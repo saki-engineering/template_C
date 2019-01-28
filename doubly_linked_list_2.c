@@ -1,4 +1,5 @@
-//未ソート単方向連結リスト(headあり・tailなし)
+//既ソート双方向連結リスト(head・tailあり)
+//ソートは昇順
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -10,11 +11,13 @@
 typedef struct slobj_{
     int key;
     struct slobj_ *next;
+    struct slobj_ *prev;
 }*slobj;
 
 //slobj型の変数のポインタをslist型と定義→いずれリストの先頭要素を指す
 typedef struct{
     slobj head;
+    slobj tail;
 }*slist;
 
 //メモリ確保
@@ -25,6 +28,7 @@ slobj slobj_new(int x){
     NEW(p,1);
     p->key=x;
     p->next=NULL;
+    p->prev=NULL;
     return p;
 }
 
@@ -33,6 +37,7 @@ slist slist_new(void){
     slist L;
     NEW(L,1);
     L->head=NULL;
+    L->tail=NULL;
     return L;
 }
 
@@ -78,44 +83,63 @@ slobj slist_search(slist L, int k){
     return p;
 }
 
-//insert O(1)
+//insert O(n)
 
-//slobj型の要素pをリストLの先頭に挿入する関数
-void slist_insert_head(slist L,slobj p){
-    p->next=L->head;
-    L->head=p;
-    
+//slobj型の要素pをリストLのソートを保ったまま挿入する関数
+void slist_insert(slist L,slobj p){
+    slobj q;
+    q=L->head;
+
+    //挿入場所の探索(ここで探索したqの前にpを挿入する)
+    while(q!=NULL){
+        if((q->key)<(p->key)){
+            q=q->next;
+        }
+        else{
+            break;
+        }
+    }
+
+    //挿入時のポインタ操作
+    if(q==L->head){ //もし先頭に挿入するなら
+        p->prev=NULL;
+        p->next=q;
+        q->prev=p;
+        L->head=p;
+    }
+    if(q==NULL){ //もし最後尾に挿入するなら
+        p->next=NULL;
+        p->prev=L->tail;
+        L->tail->next=p;
+        L->tail=p;
+    }
+    if(q!=L->head&&q!=NULL){ //上のどちらでもないなら
+        p->prev=q->prev;
+        p->next=q;
+        q->prev=p;
+        q->prev->next=p;
+    }
+
     return;
 }
 
-//delete O(n)
+//delete O(1)
 
-//リストの中で要素がkとなる最初のslobj要素を削除する
-void slist_delete(slist L, int k){
-    slobj p,q;
-    //qが削除したい要素、pがqの前の要素
-    p=NULL;
-    q=L->head;
-
-    //削除する要素qとその前要素pを探索する
-    while(q!=NULL){
-        if(q->key==k){
-            break;
-        }
-        else{
-            q=p;
-            p=p->next;
-        }
+//リストLの中のslobj要素pを削除する
+void slist_delete(slist L, slobj p){
+    if(p==L->head){
+        p->next->prev=NULL;
+        L->head=p->next;
     }
-
-    if(q==L->head){
-        L->head=q->next;
-        free_slobj(q);
+    if(p==L->tail){
+        p->prev->next=NULL;
+        L->tail=p->prev;
     }
-    else if(q!=NULL){
-        p->next=q->next;
-        free_slobj(q);
+    if(p!=L->head&&p!=L->tail){
+        p->prev->next=p->next;
+        p->next->prev=p->prev;
     }
+    free_slobj(p);
     
     return;
 }

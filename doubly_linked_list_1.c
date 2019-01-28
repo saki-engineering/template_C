@@ -1,4 +1,4 @@
-//未ソート単方向連結リスト(headあり・tailなし)
+//未ソート双方向連結リスト(head・tailあり)
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -10,11 +10,13 @@
 typedef struct slobj_{
     int key;
     struct slobj_ *next;
+    struct slobj_ *prev;
 }*slobj;
 
 //slobj型の変数のポインタをslist型と定義→いずれリストの先頭要素を指す
 typedef struct{
     slobj head;
+    slobj tail;
 }*slist;
 
 //メモリ確保
@@ -25,6 +27,7 @@ slobj slobj_new(int x){
     NEW(p,1);
     p->key=x;
     p->next=NULL;
+    p->prev=NULL;
     return p;
 }
 
@@ -33,6 +36,7 @@ slist slist_new(void){
     slist L;
     NEW(L,1);
     L->head=NULL;
+    L->tail=NULL;
     return L;
 }
 
@@ -82,40 +86,39 @@ slobj slist_search(slist L, int k){
 
 //slobj型の要素pをリストLの先頭に挿入する関数
 void slist_insert_head(slist L,slobj p){
+    p->prev=NULL;
     p->next=L->head;
     L->head=p;
     
     return;
 }
 
-//delete O(n)
+//slobj型の要素pをリストLの最後に挿入する関数
+void slist_insert_tail(slist L,slobj p){
+    p->prev=L->tail;
+    p->next=NULL;
+    L->tail=p;
+    
+    return;
+}
 
-//リストの中で要素がkとなる最初のslobj要素を削除する
-void slist_delete(slist L, int k){
-    slobj p,q;
-    //qが削除したい要素、pがqの前の要素
-    p=NULL;
-    q=L->head;
+//delete O(1)
 
-    //削除する要素qとその前要素pを探索する
-    while(q!=NULL){
-        if(q->key==k){
-            break;
-        }
-        else{
-            q=p;
-            p=p->next;
-        }
+//リストLの中のslobj要素pを削除する
+void slist_delete(slist L, slobj p){
+    if(p==L->head){
+        p->next->prev=NULL;
+        L->head=p->next;
     }
-
-    if(q==L->head){
-        L->head=q->next;
-        free_slobj(q);
+    if(p==L->tail){
+        p->prev->next=NULL;
+        L->tail=p->prev;
     }
-    else if(q!=NULL){
-        p->next=q->next;
-        free_slobj(q);
+    if(p!=L->head&&p!=L->tail){
+        p->prev->next=p->next;
+        p->next->prev=p->prev;
     }
+    free_slobj(p);
     
     return;
 }

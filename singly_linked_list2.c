@@ -1,4 +1,5 @@
-//未ソート単方向連結リスト(headあり・tailなし)
+//既ソート単方向連結リスト(headあり・tailなし)
+//ソートは昇順
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -78,13 +79,34 @@ slobj slist_search(slist L, int k){
     return p;
 }
 
-//insert O(1)
+//insert O(n)
 
-//slobj型の要素pをリストLの先頭に挿入する関数
-void slist_insert_head(slist L,slobj p){
-    p->next=L->head;
-    L->head=p;
-    
+//slobj型の要素pをリストLのソートを保ったまま挿入する関数
+void slist_insert(slist L,slobj p){
+    slobj q,r;
+    q=L->head;
+    r=NULL;
+
+    //挿入場所の探索
+    while(q!=NULL){
+        if((q->key)<(p->key)){
+            r=q;
+            q=q->next;
+        }
+        else{
+            break;
+        }
+    }
+
+    //挿入時のポインタ操作
+    if(r==NULL){
+        L->head=p;
+    }
+    else{
+        r->next=p;
+    }
+    p->next=q;
+
     return;
 }
 

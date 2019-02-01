@@ -23,7 +23,7 @@ vector create_vector(int c){
 //0-b-1,0-c-1の添字のものを作る
 matrix create_matrix(int b, int c){
     matrix M;
-    NEW(M,1);
+    NEW(M,b);
     for(int i=0;i<b;i++){
         M[i]=create_vector(c);
     }
@@ -33,7 +33,7 @@ matrix create_matrix(int b, int c){
 //0-a-1,0-b-1,0-c-1の添字のものを作る
 tmatrix create_tmatrix(int a, int b, int c){
     tmatrix T;
-    NEW(T,1);
+    NEW(T,a);
     for(int i=0;i<a;i++){
         T[i]=create_matrix(b,c);
     }

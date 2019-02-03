@@ -67,3 +67,10 @@ int string_compare(String p,String q){
     
     return n;
 }
+
+int ctoi(char c) {
+	if (c >= '0' && c <= '9') {
+		return c - '0';
+	}
+	return 0;
+}
